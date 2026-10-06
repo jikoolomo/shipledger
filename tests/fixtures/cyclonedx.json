@@ -1,0 +1,28 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "name": "tobi",
+      "version": "0.8.3",
+      "type": "application"
+    }
+  },
+  "components": [
+    {
+      "name": "fast-glob",
+      "version": "3.3.2",
+      "purl": "pkg:npm/fast-glob@3.3.2",
+      "type": "library",
+      "licenses": [{ "license": { "id": "MIT" } }]
+    },
+    {
+      "name": "zod",
+      "version": "3.23.8",
+      "purl": "pkg:npm/zod@3.23.8",
+      "type": "library",
+      "licenses": [{ "license": { "id": "MIT" } }]
+    }
+  ]
+}

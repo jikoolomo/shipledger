@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="vitest tests" tests="2" failures="0" errors="0" time="0.45">
+  <testsuite name="unit" tests="2" failures="0" errors="0" skipped="0" time="0.45">
+    <testcase name="should calculate hash" classname="crypto.test.ts" time="0.01"/>
+    <testcase name="should parse sbom" classname="sbom.test.ts" time="0.02"/>
+  </testsuite>
+</testsuites>

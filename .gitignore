@@ -1,0 +1,12 @@
+node_modules/
+# dist is included for GitHub Action runtime (dist/action/index.js)
+
+*.log
+.DS_Store
+.coverage/
+coverage/
+
+# Test output
+shipledger-evidence.json
+shipledger-evidence.md
+shipledger-manifest.json

@@ -1,0 +1,35 @@
+schema: 1
+
+product:
+  id: shipledger
+  name: ShipLedger
+  version: 0.1.0
+  manufacturer: Oruvena
+
+profile:
+  type: baseline
+
+mode: advisory
+
+evidence:
+  sbom:
+    path: tests/fixtures/cyclonedx.json
+
+  tests:
+    junit:
+      - tests/fixtures/junit-passed.xml
+
+  artifacts:
+    - tests/fixtures/*.dmg
+
+policy:
+  vulnerability:
+    block_critical: true
+    review_high: true
+    review_known_exploited: true
+
+  risk_acceptance:
+    max_expiry_days: 30
+
+cloud:
+  upload: false

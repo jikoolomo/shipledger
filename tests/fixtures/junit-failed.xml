@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="vitest tests" tests="3" failures="1" errors="0" time="0.65">
+  <testsuite name="unit" tests="3" failures="1" errors="0" skipped="0" time="0.65">
+    <testcase name="test 1" classname="a.test.ts" time="0.01"/>
+    <testcase name="test 2" classname="a.test.ts" time="0.02">
+      <failure message="expected 1 to be 2">AssertionError: expected 1 to be 2</failure>
+    </testcase>
+    <testcase name="test 3" classname="a.test.ts" time="0.01"/>
+  </testsuite>
+</testsuites>

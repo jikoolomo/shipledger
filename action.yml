@@ -1,0 +1,30 @@
+name: "ShipLedger Release Evidence"
+description: "Release evidence infrastructure and CRA readiness gatekeeper"
+author: "Oruvena"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  config:
+    description: "Path to ShipLedger configuration file"
+    required: false
+    default: ".shipledger.yml"
+
+outputs:
+  status:
+    description: "Overall evidence evaluation status (READY, REVIEW_REQUIRED, INCOMPLETE)"
+  evidence_path:
+    description: "Absolute path to the generated shipledger-evidence.json file"
+  evidence_digest:
+    description: "Deterministic SHA-256 canonical digest of the evidence bundle"
+  finding_count:
+    description: "Total number of vulnerability findings identified"
+  critical_count:
+    description: "Number of unaccepted critical findings"
+  review_required:
+    description: "Boolean indicating whether human review is required"
+
+runs:
+  using: "node24"
+  main: "dist/action/index.js"

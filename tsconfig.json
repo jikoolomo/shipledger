@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2024"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shipledger/schema": ["packages/schema/src/index.ts"],
+      "@shipledger/crypto": ["packages/crypto/src/index.ts"],
+      "@shipledger/parsers": ["packages/parsers/src/index.ts"],
+      "@shipledger/policy": ["packages/policy/src/index.ts"],
+      "@shipledger/core": ["packages/core/src/index.ts"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "packages/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

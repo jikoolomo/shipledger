@@ -111,4 +111,29 @@ program
     }
   });
 
+program
+  .command("diff")
+  .description("Compare two release evidence bundles and display changes")
+  .argument("<prevFile>", "Path to previous release shipledger-evidence.json")
+  .argument("[currFile]", "Path to current release shipledger-evidence.json (default: ./shipledger-evidence.json)", "shipledger-evidence.json")
+  .action(async (prevFile, currFile) => {
+    try {
+      const rawPrev = await readFile(path.resolve(process.cwd(), prevFile), "utf-8");
+      const rawCurr = await readFile(path.resolve(process.cwd(), currFile), "utf-8");
+
+      const prev = ReleaseEvidenceBundleSchema.parse(JSON.parse(rawPrev));
+      const curr = ReleaseEvidenceBundleSchema.parse(JSON.parse(rawCurr));
+
+      const { computeReleaseDiff, formatReleaseDiffMarkdown } = await import("@shipledger/core");
+      const diffResult = computeReleaseDiff(prev, curr);
+      const markdown = formatReleaseDiffMarkdown(diffResult);
+
+      console.log("\n" + markdown + "\n");
+    } catch (err: any) {
+      console.error("[ShipLedger ERROR]:", err.message);
+      process.exit(1);
+    }
+  });
+
 program.parse(process.argv);
+

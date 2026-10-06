@@ -34,8 +34,12 @@ Keep session evidence in Docs/Logs, one immutable file per material session.
 ---
 
 ## 🎯 Current Stage & Next Steps
-- **현재 상태:** Phase 0 프로토타입 구현 및 Vitest 15개 테스트 통과, 데모 앱 구축 완료 (Commit `d81ec63`)
+- **현재 상태:**
+  - Phase 0 프로토타입 구현 및 Vitest 21개 테스트 통과
+  - Tovi 실제 프로덕션 SBOM(994 컴포넌트) 기반 Dogfooding 증거 번들 생성 검증 완료
+  - Release Diff 엔진 및 CLI (`shipledger diff`) 구현 완료
 - **다음 단계:**
-  1. Oruvena Tovi 프로젝트 실전 연동 (`docs/INTEGRATION_TOVI.md` 기반 Dogfooding)
-  2. Release Diff 모듈 구현 (`shipledger diff`)
-  3. Phase 1 GitHub Marketplace 패키징
+  1. Phase 1 GitHub Marketplace 공개 배포 패키징 (`SECURITY.md`, Issue/PR templates)
+  2. 원격 GitHub 저장소(`github.com/oruvena/shipledger`) 연결 및 릴리즈 태그(`v0.1.0`) 발행
+  3. Phase 2 Cloud SaaS 설계 및 연동 준비
+

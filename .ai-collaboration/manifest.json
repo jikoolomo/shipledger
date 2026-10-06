@@ -1,0 +1,9 @@
+{
+  "schema": "lomo.ai_collab.manifest.v1",
+  "managed_by": "workspace-policy",
+  "project": "ShipLedger",
+  "logs": "Docs/Logs",
+  "active_tasks": ".ai-collaboration/ACTIVE_TASKS",
+  "handoffs_open": ".ai-collaboration/HANDOFFS/open",
+  "handoffs_done": ".ai-collaboration/HANDOFFS/done"
+}

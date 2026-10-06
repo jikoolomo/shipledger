@@ -1,0 +1,15 @@
+{
+  "schema": "workspace.policy.snapshot.v1",
+  "source": "Developer/.agents",
+  "source_commit": "771155f3e9a1353dbf289748664aecdd9d9368e1",
+  "files": {
+    "AI_COLLABORATION_CHARTER.md": {
+      "sha256": "0fe47186076a60cc26a102fb6c82708e03c491f99b208bd6dca38b9ed52d522e",
+      "source_sha256": "5752f6c10fa8e3efef236827ec6337abc24a0e714aded33b09688a62e43ff632"
+    },
+    "COLLABORATION_PROTOCOL.md": {
+      "sha256": "dfaab8c60b4c75dca13fffe409a9f8afd2d1f4eb54256693c6d78f8c84e4b5e9",
+      "source_sha256": "850c6ff6beb91bce0636903839316237e6134ffe4e1f02043bc09de4b61b769c"
+    }
+  }
+}

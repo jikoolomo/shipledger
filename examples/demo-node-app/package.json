@@ -1,0 +1,15 @@
+{
+  "name": "demo-node-app",
+  "version": "1.0.0",
+  "description": "Example application demonstrating ShipLedger release evidence generation",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run --reporter=junit --outputFile=./reports/junit.xml",
+    "sbom": "npx @cyclonedx/cyclonedx-npm --output-file ./sbom.cdx.json",
+    "build": "mkdir -p dist && echo 'demo binary v1.0.0' > dist/app-v1.0.0.zip",
+    "shipledger": "shipledger run"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

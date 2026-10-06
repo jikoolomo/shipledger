@@ -1,0 +1,50 @@
+name: Release & Verification
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests (JUnit output)
+        run: npm test
+
+      - name: Generate SBOM (CycloneDX)
+        run: npx @cyclonedx/cyclonedx-npm --output-file ./sbom.cdx.json
+
+      - name: Build Artifacts
+        run: npm run build
+
+      # ShipLedger Release Evidence Action
+      - name: Generate Release Evidence
+        uses: oruvena/shipledger@v1
+        with:
+          config: .shipledger.yml
+
+      # ShipLedger evidence bundle is automatically attached to workflow artifacts
+      - name: Upload Evidence Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence
+          path: |
+            shipledger-evidence.json
+            shipledger-evidence.md

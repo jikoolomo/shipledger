@@ -51,6 +51,12 @@ export const orgRoleEnum = pgEnum("org_role", [
   "member"
 ]);
 
+export const incidentTypeEnum = pgEnum("cra_incident_type", [
+  "ACTIVELY_EXPLOITED_VULNERABILITY",
+  "SEVERE_SECURITY_INCIDENT",
+  "OTHER"
+]);
+
 // --- 1. Users & Organizations ---
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -236,3 +242,50 @@ export const findingRelations = relations(findings, ({ one, many }) => ({
   component: one(components, { fields: [findings.componentId], references: [components.id] }),
   riskDecisions: many(riskDecisions)
 }));
+
+// --- 8. Phase 3 CRA Incident Workspace (Section 38, 43~46) ---
+export const incidents = pgTable("incidents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  releaseId: uuid("release_id").references(() => releases.id, { onDelete: "cascade" }).notNull(),
+  type: incidentTypeEnum("type").notNull(),
+  title: text("title").notNull(),
+  impactSummary: text("impact_summary"),
+  mitigationStatus: text("mitigation_status"),
+  confirmedByUserId: uuid("confirmed_by_user_id").references(() => users.id),
+  confirmedAwarenessTime: timestamp("confirmed_awareness_time").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const incidentDeadlines = pgTable("incident_deadlines", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  incidentId: uuid("incident_id").references(() => incidents.id, { onDelete: "cascade" }).notNull().unique(),
+  earlyWarningDeadline24h: timestamp("early_warning_deadline_24h").notNull(),
+  fullNotificationDeadline72h: timestamp("full_notification_deadline_72h").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const incidentEvents = pgTable("incident_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  incidentId: uuid("incident_id").references(() => incidents.id, { onDelete: "cascade" }).notNull(),
+  actorUserId: uuid("actor_user_id").references(() => users.id),
+  eventType: varchar("event_type", { length: 64 }).notNull(),
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const notificationDrafts = pgTable("notification_drafts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  incidentId: uuid("incident_id").references(() => incidents.id, { onDelete: "cascade" }).notNull(),
+  schemaVersion: varchar("schema_version", { length: 64 }).notNull(),
+  dossierJson: jsonb("dossier_json").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const incidentRelations = relations(incidents, ({ one, many }) => ({
+  release: one(releases, { fields: [incidents.releaseId], references: [releases.id] }),
+  confirmedByUser: one(users, { fields: [incidents.confirmedByUserId], references: [users.id] }),
+  deadlines: one(incidentDeadlines, { fields: [incidents.id], references: [incidentDeadlines.incidentId] }),
+  events: many(incidentEvents),
+  drafts: many(notificationDrafts)
+}));
+

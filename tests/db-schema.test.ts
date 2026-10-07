@@ -9,10 +9,14 @@ import {
   releases,
   repositories,
   riskDecisions,
-  sboms
+  sboms,
+  incidents,
+  incidentDeadlines,
+  incidentEvents,
+  notificationDrafts
 } from "../packages/db/src/index.js";
 
-describe("Phase 2 Cloud Database Schema (Drizzle ORM)", () => {
+describe("Phase 2 & 3 Cloud Database Schema (Drizzle ORM)", () => {
   it("should have valid core table definitions", () => {
     expect(releases).toBeDefined();
     expect(evidenceBundles).toBeDefined();
@@ -24,6 +28,10 @@ describe("Phase 2 Cloud Database Schema (Drizzle ORM)", () => {
     expect(auditEvents).toBeDefined();
     expect(repositories).toBeDefined();
     expect(products).toBeDefined();
+    expect(incidents).toBeDefined();
+    expect(incidentDeadlines).toBeDefined();
+    expect(incidentEvents).toBeDefined();
+    expect(notificationDrafts).toBeDefined();
   });
 
   it("should enforce correct column definitions for releases table", () => {
@@ -39,5 +47,14 @@ describe("Phase 2 Cloud Database Schema (Drizzle ORM)", () => {
     expect(auditEvents.resourceType).toBeDefined();
     expect(auditEvents.resourceId).toBeDefined();
     expect(auditEvents.timestamp).toBeDefined();
+  });
+
+  it("should enforce CRA Article 14 incident workspace columns (Section 38, 44~45)", () => {
+    expect(incidents.releaseId).toBeDefined();
+    expect(incidents.confirmedAwarenessTime).toBeDefined();
+    expect(incidents.type).toBeDefined();
+    expect(incidentDeadlines.earlyWarningDeadline24h).toBeDefined();
+    expect(incidentDeadlines.fullNotificationDeadline72h).toBeDefined();
+    expect(notificationDrafts.dossierJson).toBeDefined();
   });
 });

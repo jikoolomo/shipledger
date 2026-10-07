@@ -12,7 +12,8 @@ export default defineConfig({
       "@shipledger/crypto": path.resolve(__dirname, "packages/crypto/src/index.ts"),
       "@shipledger/parsers": path.resolve(__dirname, "packages/parsers/src/index.ts"),
       "@shipledger/policy": path.resolve(__dirname, "packages/policy/src/index.ts"),
-      "@shipledger/core": path.resolve(__dirname, "packages/core/src/index.ts")
+      "@shipledger/core": path.resolve(__dirname, "packages/core/src/index.ts"),
+      "@shipledger/db": path.resolve(__dirname, "packages/db/src/index.ts")
     }
   }
 });

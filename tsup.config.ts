@@ -5,7 +5,8 @@ export default defineConfig([
     entry: {
       "action/index": "src/action/index.ts"
     },
-    format: ["esm"],
+    format: ["cjs"],
+    platform: "node",
     target: "node24",
     bundle: true,
     noExternal: [/(.*)/], // GitHub Action single bundle

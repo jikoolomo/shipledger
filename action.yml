@@ -27,4 +27,5 @@ outputs:
 
 runs:
   using: "node24"
-  main: "dist/action/index.js"
+  main: "dist/action/index.cjs"
+

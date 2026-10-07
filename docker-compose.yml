@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: shipledger-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shipledger
+      POSTGRES_PASSWORD: shipledger_dev
+      POSTGRES_DB: shipledger
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shipledger -d shipledger"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shipledger-web
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://shipledger:shipledger_dev@postgres:5432/shipledger
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

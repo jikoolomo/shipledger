@@ -16,7 +16,9 @@
     "typecheck": "tsc --noEmit",
     "cli": "node dist/cli/index.js",
     "web:dev": "next dev apps/web --webpack",
-    "web:build": "next build apps/web --webpack"
+    "web:build": "next build apps/web --webpack",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
@@ -38,6 +40,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.6.1",
+    "drizzle-kit": "^0.31.11",
     "postcss": "^8.5.29",
     "tailwindcss": "^4.3.3",
     "tsup": "^8.4.0",

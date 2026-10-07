@@ -10,3 +10,8 @@ coverage/
 shipledger-evidence.json
 shipledger-evidence.md
 shipledger-manifest.json
+
+# Next.js build cache
+.next/
+apps/web/.next/
+apps/web/next-env.d.ts

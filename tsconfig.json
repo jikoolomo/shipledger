@@ -19,7 +19,8 @@
       "@shipledger/parsers": ["packages/parsers/src/index.ts"],
       "@shipledger/policy": ["packages/policy/src/index.ts"],
       "@shipledger/core": ["packages/core/src/index.ts"],
-      "@shipledger/db": ["packages/db/src/index.ts"]
+      "@shipledger/db": ["packages/db/src/index.ts"],
+      "@shipledger/api": ["packages/api/src/index.ts"]
     }
   },
   "include": [

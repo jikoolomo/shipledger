@@ -1,0 +1,38 @@
+name: Feature Request
+description: Suggest an enhancement or new feature for ShipLedger
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please review [docs/SPEC.md](../docs/SPEC.md) and [AGENTS.md](../AGENTS.md) before submitting a feature proposal.
+        ShipLedger focuses purely on **Release Evidence & Integrity Gates** and strictly excludes general scanner development, project management boards, and chat bots.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a specific release evidence or compliance challenge?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you would like to see.
+    validations:
+      required: true
+  - type: checkboxes
+    id: anti_goals
+    attributes:
+      label: Product Boundary Checklist
+      description: Please confirm that your proposal aligns with ShipLedger product principles.
+      options:
+        - label: This is NOT a request to build a new custom vulnerability scanner.
+          required: true
+        - label: This does NOT require retaining or uploading private source code.
+          required: true
+        - label: This does NOT add project management tools (Tasks, Sprints, Kanban).
+          required: true
+        - label: This maintains deterministic policy evaluation (no arbitrary AI pass/fail).
+          required: true

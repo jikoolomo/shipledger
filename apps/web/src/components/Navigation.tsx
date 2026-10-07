@@ -49,6 +49,13 @@ export function Navigation() {
               Findings
             </Link>
             <Link
+              href="/incidents"
+              className="px-3 py-1.5 text-sm font-medium rounded-md text-amber-400 hover:text-amber-300 hover:bg-muted transition-colors flex items-center gap-1.5"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              Incidents
+            </Link>
+            <Link
               href="/settings"
               className="px-3 py-1.5 text-sm font-medium rounded-md text-muted-foreground hover:text-white hover:bg-muted transition-colors"
             >

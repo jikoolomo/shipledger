@@ -1,14 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { GET as getIncidents, POST as postIncident } from "../apps/web/src/app/api/v1/incidents/route";
-import { GET as getDossier } from "../apps/web/src/app/api/v1/incidents/[id]/dossier/route";
-import { NextRequest } from "next/server";
+import { GET as getIncidents, POST as postIncident } from "../apps/web/src/app/api/v1/incidents/route.js";
+import { GET as getDossier } from "../apps/web/src/app/api/v1/incidents/[id]/dossier/route.js";
 
 describe("CRA Article 14 Incidents API", () => {
   it("should return incident list and calculate CRA deadlines", async () => {
     const res = await getIncidents();
     expect(res.status).toBe(200);
 
-    const data = await res.json();
+    const data = (await res.json()) as any;
     expect(data.regulation).toContain("Article 14");
     expect(Array.isArray(data.incidents)).toBe(true);
 
@@ -22,7 +21,7 @@ describe("CRA Article 14 Incidents API", () => {
 
   it("should create a new CRA incident with confirmed awareness time", async () => {
     const now = new Date();
-    const req = new NextRequest("http://localhost:3000/api/v1/incidents", {
+    const req = new Request("http://localhost:3000/api/v1/incidents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -35,10 +34,10 @@ describe("CRA Article 14 Incidents API", () => {
       })
     });
 
-    const res = await postIncident(req);
+    const res = await postIncident(req as any);
     expect(res.status).toBe(201);
 
-    const data = await res.json();
+    const data = (await res.json()) as any;
     expect(data.incident.id).toBeDefined();
     expect(data.incident.type).toBe("ACTIVELY_EXPLOITED_VULNERABILITY");
     expect(data.incident.deadlines.early_warning_remaining_hours).toBe(24);
@@ -46,7 +45,7 @@ describe("CRA Article 14 Incidents API", () => {
   });
 
   it("should reject incident creation when awareness time is missing", async () => {
-    const req = new NextRequest("http://localhost:3000/api/v1/incidents", {
+    const req = new Request("http://localhost:3000/api/v1/incidents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -55,13 +54,13 @@ describe("CRA Article 14 Incidents API", () => {
       })
     });
 
-    const res = await postIncident(req);
+    const res = await postIncident(req as any);
     expect(res.status).toBe(400);
   });
 
   it("should generate ENISA SRP compatible dossier in markdown format", async () => {
-    const req = new NextRequest("http://localhost:3000/api/v1/incidents/inc-cra-2026-001/dossier?format=markdown");
-    const res = await getDossier(req, {
+    const req = new Request("http://localhost:3000/api/v1/incidents/inc-cra-2026-001/dossier?format=markdown");
+    const res = await getDossier(req as any, {
       params: Promise.resolve({ id: "inc-cra-2026-001" })
     });
 

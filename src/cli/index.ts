@@ -12,7 +12,7 @@ const program = new Command();
 program
   .name("shipledger")
   .description("ShipLedger CLI - Release Evidence Infrastructure")
-  .version("0.1.0");
+  .version("0.2.0");
 
 program
   .command("run")

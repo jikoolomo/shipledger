@@ -4,7 +4,7 @@ export async function GET() {
   return NextResponse.json({
     status: "healthy",
     service: "shipledger-cloud",
-    version: "0.1.0",
+    version: "0.2.0",
     engine: "node24",
     timestamp: new Date().toISOString()
   });

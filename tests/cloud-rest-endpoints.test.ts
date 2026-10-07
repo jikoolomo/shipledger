@@ -14,7 +14,7 @@ describe("ShipLedger Cloud REST API Endpoints (Section 37)", () => {
     const data = (await res.json()) as any;
     expect(data.status).toBe("healthy");
     expect(data.service).toBe("shipledger-cloud");
-    expect(data.version).toBe("0.1.0");
+    expect(data.version).toBe("0.2.0");
   });
 
   it("GET /api/v1/repositories should list connected repositories", async () => {

@@ -273,7 +273,7 @@ ${errorDetails}`);
 
 // src/cli/index.ts
 var program = new Command();
-program.name("shipledger").description("ShipLedger CLI - Release Evidence Infrastructure").version("0.1.0");
+program.name("shipledger").description("ShipLedger CLI - Release Evidence Infrastructure").version("0.2.0");
 program.command("run").description("Collect evidence, evaluate policy, and generate release evidence bundle").option("-c, --config <path>", "Path to .shipledger.yml", ".shipledger.yml").option("-o, --output-dir <path>", "Output directory for evidence bundle", ".").action(async (options) => {
   try {
     const cwd = process.cwd();

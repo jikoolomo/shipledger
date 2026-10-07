@@ -1,6 +1,6 @@
 {
   "name": "shipledger",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Release Evidence Infrastructure and CRA Readiness Layer",
   "type": "module",
   "author": "Oruvena",

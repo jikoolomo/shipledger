@@ -816,6 +816,205 @@ function formatReleaseDiffMarkdown(diff) {
   return lines.join("\n");
 }
 
+// packages/core/src/monitoring.ts
+async function monitorReleaseVulnerabilities(options) {
+  const { bundle, osvFindingsFetcher = queryOsvForComponents } = options;
+  const now = options.now || /* @__PURE__ */ new Date();
+  const components = bundle.sbom.components || [];
+  const latestFindings = await osvFindingsFetcher(components);
+  const knownFindingKeys = /* @__PURE__ */ new Set();
+  for (const f of bundle.vulnerabilities) {
+    knownFindingKeys.add(`${f.id}:${f.package_name}:${f.package_version}`);
+  }
+  const newFindings = latestFindings.filter(
+    (f) => !knownFindingKeys.has(`${f.id}:${f.package_name}:${f.package_version}`)
+  );
+  const hasEvent = newFindings.length > 0;
+  const severityCounts = {
+    CRITICAL: 0,
+    HIGH: 0,
+    MEDIUM: 0,
+    LOW: 0,
+    UNKNOWN: 0
+  };
+  for (const f of newFindings) {
+    if (f.severity in severityCounts) {
+      severityCounts[f.severity]++;
+    } else {
+      severityCounts.UNKNOWN++;
+    }
+  }
+  const alert = hasEvent ? "POTENTIAL SECURITY EVENT: Human review required" : null;
+  const repo = bundle.release.repository;
+  const tag = bundle.release.tag || bundle.release.commit_sha.substring(0, 7);
+  const lines = [];
+  lines.push(`## \u{1F6E1}\uFE0F ShipLedger Continuous Vulnerability Monitoring Report`);
+  lines.push(`- **Target Release:** \`${repo}@${tag}\` (Commit: \`${bundle.release.commit_sha.substring(0, 7)}\`)`);
+  lines.push(`- **Monitored At:** ${now.toISOString()}`);
+  lines.push(`- **SBOM Components Scanned:** ${components.length}`);
+  lines.push(`- **Prior Findings at Release:** ${bundle.vulnerabilities.length}`);
+  lines.push("");
+  if (hasEvent) {
+    lines.push(`> [!WARNING]`);
+    lines.push(`> **${alert}**`);
+    lines.push(`> ${newFindings.length} new vulnerability finding(s) discovered in components since this version was released.`);
+    lines.push("");
+    lines.push(`### Newly Discovered Findings (${newFindings.length})`);
+    lines.push(`| Severity | Vulnerability ID | Package | Version | Summary |`);
+    lines.push(`|---|---|---|---|---|`);
+    for (const f of newFindings) {
+      lines.push(
+        `| **${f.severity}** | \`${f.id}\` | \`${f.package_name}\` | \`${f.package_version}\` | ${f.summary || "No summary provided"} |`
+      );
+    }
+    lines.push("");
+    lines.push(`*Next Action: Human review and confirm awareness time (Section 44).*`);
+  } else {
+    lines.push(`> [!NOTE]`);
+    lines.push(`> **No newly discovered vulnerabilities.** All ${components.length} components match the baseline established at release time.`);
+  }
+  return {
+    monitored_at: now.toISOString(),
+    release: {
+      repository: bundle.release.repository,
+      commit_sha: bundle.release.commit_sha,
+      tag: bundle.release.tag
+    },
+    total_components_scanned: components.length,
+    known_findings_count: bundle.vulnerabilities.length,
+    new_findings: newFindings,
+    has_potential_security_event: hasEvent,
+    alert,
+    critical_new_count: severityCounts.CRITICAL,
+    high_new_count: severityCounts.HIGH,
+    new_findings_by_severity: severityCounts,
+    markdownReport: lines.join("\n")
+  };
+}
+
+// packages/core/src/export.ts
+function generateCraIncidentDossier(input) {
+  const {
+    bundle,
+    findingId,
+    incidentType,
+    confirmedAwarenessTime,
+    confirmedBy,
+    securityContact = "security@oruvena.com",
+    impactSummary = "Pending detailed technical impact analysis",
+    mitigationStatus = "Remediation patch under preparation",
+    now = /* @__PURE__ */ new Date()
+  } = input;
+  if (!confirmedBy || confirmedBy.trim().length === 0) {
+    throw new Error("Human confirmation actor (confirmedBy) is required for CRA incident dossier (Section 44)");
+  }
+  const awarenessDate = new Date(confirmedAwarenessTime);
+  if (isNaN(awarenessDate.getTime())) {
+    throw new Error("Invalid confirmed awareness timestamp format");
+  }
+  const finding = bundle.vulnerabilities.find(
+    (v) => v.id === findingId
+  );
+  const vulnData = finding || {
+    id: findingId,
+    package_name: "unknown-package",
+    package_version: "unknown-version",
+    severity: "HIGH",
+    summary: `Vulnerability ${findingId} affecting release ${bundle.release.commit_sha.substring(0, 7)}`,
+    known_exploited: incidentType === "ACTIVELY_EXPLOITED_VULNERABILITY",
+    status: "REVIEW_REQUIRED",
+    aliases: []
+  };
+  const earlyWarningMs = awarenessDate.getTime() + 24 * 60 * 60 * 1e3;
+  const fullNotificationMs = awarenessDate.getTime() + 72 * 60 * 60 * 1e3;
+  const earlyWarningRemainingHours = Math.max(
+    0,
+    Math.round((earlyWarningMs - now.getTime()) / (1e3 * 60 * 60) * 10) / 10
+  );
+  const fullNotificationRemainingHours = Math.max(
+    0,
+    Math.round((fullNotificationMs - now.getTime()) / (1e3 * 60 * 60) * 10) / 10
+  );
+  const dossierId = `cra-${findingId.toLowerCase()}-${bundle.release.commit_sha.substring(0, 7)}`;
+  return {
+    schema_version: "shipledger.cra_dossier.v1",
+    dossier_id: dossierId,
+    created_at: now.toISOString(),
+    product: {
+      repository: bundle.release.repository,
+      commit_sha: bundle.release.commit_sha,
+      tag: bundle.release.tag,
+      evidence_digest: bundle.integrity.evidence_digest
+    },
+    vulnerability: {
+      id: vulnData.id,
+      package_name: vulnData.package_name,
+      package_version: vulnData.package_version,
+      severity: vulnData.severity,
+      summary: vulnData.summary,
+      known_exploited: vulnData.known_exploited
+    },
+    incident: {
+      incident_type: incidentType,
+      impact_summary: impactSummary.trim(),
+      mitigation_status: mitigationStatus.trim()
+    },
+    human_confirmation: {
+      confirmed_by: confirmedBy.trim(),
+      awareness_time: awarenessDate.toISOString(),
+      disclaimer: "Human confirmed awareness time in accordance with CRA Article 14. Scanner detection timestamp is distinct from legal manufacturer awareness."
+    },
+    regulatory_timeline: {
+      awareness_time: awarenessDate.toISOString(),
+      early_warning_deadline_24h: new Date(earlyWarningMs).toISOString(),
+      early_warning_remaining_hours: earlyWarningRemainingHours,
+      full_notification_deadline_72h: new Date(fullNotificationMs).toISOString(),
+      full_notification_remaining_hours: fullNotificationRemainingHours,
+      platform: "ENISA Single Reporting Platform (SRP)"
+    },
+    contact: {
+      security_contact: securityContact
+    }
+  };
+}
+function renderCraDossierMarkdown(dossier) {
+  const lines = [];
+  lines.push(`# EU Cyber Resilience Act (CRA Article 14) Incident Dossier`);
+  lines.push("");
+  lines.push(`**Dossier ID:** \`${dossier.dossier_id}\`  `);
+  lines.push(`**Generated At:** ${dossier.created_at}  `);
+  lines.push(`**Official Target:** ${dossier.regulatory_timeline.platform}  `);
+  lines.push("");
+  lines.push(`## 1. Product & Release Identification`);
+  lines.push(`- **Repository:** \`${dossier.product.repository}\``);
+  lines.push(`- **Release Tag:** \`${dossier.product.tag || "N/A"}\``);
+  lines.push(`- **Commit SHA:** \`${dossier.product.commit_sha}\``);
+  lines.push(`- **Evidence Digest (SHA-256):** \`${dossier.product.evidence_digest}\``);
+  lines.push("");
+  lines.push(`## 2. Vulnerability Details`);
+  lines.push(`- **Vulnerability ID:** \`${dossier.vulnerability.id}\``);
+  lines.push(`- **Component:** \`${dossier.vulnerability.package_name}@${dossier.vulnerability.package_version}\``);
+  lines.push(`- **Severity:** **${dossier.vulnerability.severity}**`);
+  lines.push(`- **Actively Exploited:** ${dossier.vulnerability.known_exploited ? "YES" : "NO"}`);
+  lines.push(`- **Summary:** ${dossier.vulnerability.summary || "N/A"}`);
+  lines.push("");
+  lines.push(`## 3. Incident Classification`);
+  lines.push(`- **Incident Type:** \`${dossier.incident.incident_type}\``);
+  lines.push(`- **Impact Summary:** ${dossier.incident.impact_summary}`);
+  lines.push(`- **Mitigation Status:** ${dossier.incident.mitigation_status}`);
+  lines.push("");
+  lines.push(`## 4. Human Awareness & Regulatory Timers (Section 44 & 45)`);
+  lines.push(`- **Confirmed Awareness Time:** \`${dossier.regulatory_timeline.awareness_time}\``);
+  lines.push(`- **Confirmed By:** ${dossier.human_confirmation.confirmed_by}`);
+  lines.push(`- **24-Hour Early Warning Deadline:** \`${dossier.regulatory_timeline.early_warning_deadline_24h}\` (${dossier.regulatory_timeline.early_warning_remaining_hours}h remaining)`);
+  lines.push(`- **72-Hour Full Notification Deadline:** \`${dossier.regulatory_timeline.full_notification_deadline_72h}\` (${dossier.regulatory_timeline.full_notification_remaining_hours}h remaining)`);
+  lines.push(`- **Security Contact:** \`${dossier.contact.security_contact}\``);
+  lines.push("");
+  lines.push(`> [!NOTE]`);
+  lines.push(`> ${dossier.human_confirmation.disclaimer}`);
+  return lines.join("\n");
+}
+
 export {
   calculateFileSha256,
   computeEvidenceDigest,
@@ -825,6 +1024,9 @@ export {
   ShipledgerConfigSchema,
   buildEvidenceBundle,
   computeReleaseDiff,
-  formatReleaseDiffMarkdown
+  formatReleaseDiffMarkdown,
+  monitorReleaseVulnerabilities,
+  generateCraIncidentDossier,
+  renderCraDossierMarkdown
 };
-//# sourceMappingURL=chunk-T6PTJPZM.js.map
+//# sourceMappingURL=chunk-5IIO5PBN.js.map

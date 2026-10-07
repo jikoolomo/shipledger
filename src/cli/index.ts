@@ -135,5 +135,61 @@ program
     }
   });
 
+program
+  .command("monitor")
+  .description("Continuously monitor SBOM components of an evidence bundle against latest vulnerability data")
+  .argument("<file>", "Path to shipledger-evidence.json")
+  .action(async (filePath) => {
+    try {
+      const raw = await readFile(path.resolve(process.cwd(), filePath), "utf-8");
+      const bundle = ReleaseEvidenceBundleSchema.parse(JSON.parse(raw));
+
+      const { monitorReleaseVulnerabilities } = await import("@shipledger/core");
+      const result = await monitorReleaseVulnerabilities({ bundle });
+
+      console.log("\n" + result.markdownReport + "\n");
+      if (result.has_potential_security_event) {
+        console.warn(`[ShipLedger ALERT] ${result.alert} (${result.new_findings.length} newly discovered findings)`);
+      }
+    } catch (err: any) {
+      console.error("[ShipLedger ERROR]:", err.message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("export")
+  .description("Generate an EU Cyber Resilience Act (CRA Article 14) Incident Dossier")
+  .argument("<file>", "Path to shipledger-evidence.json")
+  .requiredOption("--finding <id>", "Vulnerability finding ID (e.g. CVE-2024-XXXX or GHSA-XXXX)")
+  .option("--type <type>", "Incident type (ACTIVELY_EXPLOITED_VULNERABILITY, SEVERE_SECURITY_INCIDENT, OTHER)", "ACTIVELY_EXPLOITED_VULNERABILITY")
+  .option("--awareness <time>", "Human confirmed awareness time (ISO string)", new Date().toISOString())
+  .option("--confirmed-by <actor>", "Name or email of confirmed actor", process.env.USER || "security-lead")
+  .option("--contact <email>", "Security contact point email", "security@oruvena.com")
+  .action(async (filePath, options) => {
+    try {
+      const raw = await readFile(path.resolve(process.cwd(), filePath), "utf-8");
+      const bundle = ReleaseEvidenceBundleSchema.parse(JSON.parse(raw));
+
+      const { generateCraIncidentDossier, renderCraDossierMarkdown } = await import("@shipledger/core");
+      const dossier = generateCraIncidentDossier({
+        bundle,
+        findingId: options.finding,
+        incidentType: options.type,
+        confirmedAwarenessTime: options.awareness,
+        confirmedBy: options.confirmedBy,
+        securityContact: options.contact
+      });
+
+      console.log("\n" + renderCraDossierMarkdown(dossier) + "\n");
+      console.log(`[ShipLedger] Dossier ID: ${dossier.dossier_id}`);
+      console.log(`[ShipLedger] 24h Early Warning Deadline: ${dossier.regulatory_timeline.early_warning_deadline_24h} (${dossier.regulatory_timeline.early_warning_remaining_hours}h remaining)`);
+      console.log(`[ShipLedger] 72h Notification Deadline: ${dossier.regulatory_timeline.full_notification_deadline_72h} (${dossier.regulatory_timeline.full_notification_remaining_hours}h remaining)`);
+    } catch (err: any) {
+      console.error("[ShipLedger ERROR]:", err.message);
+      process.exit(1);
+    }
+  });
+
 program.parse(process.argv);
 
